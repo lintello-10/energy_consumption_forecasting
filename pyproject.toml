@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "energy-consumption-forecasting"
+version = "0.1.0"
+description = "Time-series forecasting and anomaly analysis for energy consumption"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.1",
+    "scikit-learn>=1.4",
+    "statsmodels>=0.14",
+]
+
+[project.optional-dependencies]
+dev = [
+    "jupyter>=1.0",
+    "matplotlib>=3.8",
+    "pytest>=8.0",
+    "seaborn>=0.13",
+]
+dashboard = [
+    "mlflow>=3.0",
+    "plotly>=5.18",
+    "streamlit>=1.32",
+]
+models = [
+    "xgboost>=2.0",
+]
+tracking = ["mlflow>=3.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+
+
