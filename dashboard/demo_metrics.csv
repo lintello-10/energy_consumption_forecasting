@@ -1,0 +1,4 @@
+Method,MAE (kWh),RMSE (kWh),Daily windows
+Previous-day seasonal naive,0.5040,0.7554,193
+Weekday-hour average,0.5108,0.6790,193
+Gradient boosting,0.4765,0.6314,193

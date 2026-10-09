@@ -1,9 +1,10 @@
 # Historical Forecast Dashboard
 
-The Streamlit app visualizes a 24-hour forecast made from the latest complete
-hour in the UCI household electricity dataset. The source data ends in
-November 2010, so this is a historical demonstration, not a forecast of
-current consumption.
+The Streamlit app displays a bundled 14-day historical sample and a
+precomputed 24-hour forecast from the UCI household electricity dataset. The
+source data ends in November 2010, so this is a historical demonstration, not
+a forecast of current consumption. The hosted app does not access the raw
+dataset, load an MLflow model, or generate new predictions.
 
 ## Install and run
 
@@ -11,23 +12,23 @@ From the project root, with the project virtual environment activated:
 
 ```bash
 python -m pip install -e ".[dashboard]"
-export FORECAST_MODEL_URI="runs:/<run-id>/model"
 python -m streamlit run dashboard/app.py
 ```
 
-Replace `<run-id>` with the URI printed by
-`python -m energy_forecasting.train_model`. The dashboard extra installs
-Streamlit, Plotly, and MLflow. Keep the terminal running and open the local
-URL printed by Streamlit.
+The dashboard reads `demo_forecast.csv` and `demo_metrics.csv` from its own
+directory, so it can run locally or on Streamlit Community Cloud without the
+source dataset, an MLflow tracking database, or a model artifact. Keep the
+terminal running and open the local URL printed by Streamlit.
 
-The dashboard also reads the existing final-test metrics from the local
-MLflow tracking store. It does not train a model, launch an experiment, or
-rerun the final evaluation. Only use trusted MLflow model artifacts created
-by this project.
+The bundled forecast was generated once from the existing operational model
+and the historical observations immediately before its forecast origin. The
+bundled evaluation metrics are copied from the published results report; the
+dashboard does not train, launch an experiment, or rerun the final evaluation.
 
 ## What the dashboard shows
 
 - A clear historical-data warning and the latest complete observation.
+- A fixed, precomputed 24-hour forecast after the latest bundled observation.
 - Recent observed hourly energy and the following 24 model predictions, with
   the forecast period visually distinct.
 - A 3-, 7-, or 14-day historical display window and a forecast-hour selector
@@ -38,14 +39,15 @@ by this project.
   previously examined and not fully blind.
 - The model, units, missing-hour handling, and limitations.
 
-The operational model is trained on all available historical data to produce
-the demonstration forecast. It is separate from the development pipeline
-evaluated on the final holdout; the displayed holdout scores do not evaluate
-that operational artifact.
+The operational model was trained on all available historical data to produce
+the bundled demonstration forecast. It is separate from the development
+pipeline evaluated on the final holdout; the displayed holdout scores do not
+evaluate that operational artifact.
 
 The interactive controls inspect or display the existing historical forecast;
-they do not change the model, retrain it, or let users select arbitrary
-forecast dates.
+they do not run inference, change the model, retrain it, or let users select
+arbitrary forecast dates. The raw dataset, MLflow tracking database, and model
+artifact are not included in the dashboard deployment.
 
 ## Appearance and interaction checks
 

@@ -1,24 +1,20 @@
 """Streamlit dashboard for the historical electricity forecast."""
 
-import os
 from pathlib import Path
 
-import mlflow
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
 from dashboard_data import (
     build_recent_plot_series,
-    load_final_test_metrics,
-    load_forecast_data,
+    load_demo_forecast,
+    load_demo_metrics,
 )
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-RAW_DATA_PATH = PROJECT_ROOT / "data" / "raw" / "household_power_consumption.txt"
-TRACKING_DB = PROJECT_ROOT / "mlflow.db"
-TRACKING_URI = f"sqlite:///{TRACKING_DB.as_posix()}"
-MODEL_URI = os.environ.get("FORECAST_MODEL_URI", "").strip()
+DASHBOARD_DIR = Path(__file__).resolve().parent
+DEMO_FORECAST_PATH = DASHBOARD_DIR / "demo_forecast.csv"
+DEMO_METRICS_PATH = DASHBOARD_DIR / "demo_metrics.csv"
 
 st.set_page_config(
     page_title="Household Energy | Forecast Lab",
@@ -273,20 +269,22 @@ st.markdown(
 
 @st.cache_data(show_spinner=False, ttl=3600)
 def get_forecast_data(
-    raw_data_path: str,
-    raw_data_mtime_ns: int,
-    model_uri: str,
-    tracking_uri: str,
+    demo_forecast_path: str,
+    demo_forecast_mtime_ns: int,
 ) -> tuple[pd.Series, pd.Series]:
-    """Cache the deterministic historical forecast until its inputs change."""
-    del raw_data_mtime_ns
-    return load_forecast_data(raw_data_path, model_uri, tracking_uri)
+    """Cache the bundled historical demonstration until its input changes."""
+    del demo_forecast_mtime_ns
+    return load_demo_forecast(demo_forecast_path)
 
 
 @st.cache_data(show_spinner=False, ttl=300)
-def get_evaluation_metrics(tracking_uri: str) -> pd.DataFrame:
-    """Cache the existing recorded metrics without starting an MLflow run."""
-    return load_final_test_metrics(tracking_uri)
+def get_evaluation_metrics(
+    demo_metrics_path: str,
+    demo_metrics_mtime_ns: int,
+) -> pd.DataFrame:
+    """Cache the bundled evaluation summary until its input changes."""
+    del demo_metrics_mtime_ns
+    return load_demo_metrics(demo_metrics_path)
 
 
 def render_header() -> None:
@@ -321,31 +319,31 @@ def render_forecast_page() -> None:
     st.header("The next 24 hours")
     st.write(
         "Select a forecast lead and a historical context window from the "
-        "sidebar. These controls explore the existing forecast; they do not "
-        "retrain the model or change the predicted values."
+        "sidebar. This is a fixed historical example bundled with the app; "
+        "the controls explore it but do not run inference or retrain a model."
+    )
+    st.info(
+        "The displayed series is a precomputed demonstration from November "
+        "2010. The hosted app does not load the source dataset or generate "
+        "new predictions."
     )
 
-    if not MODEL_URI:
-        st.error(
-            "The model URI is not configured. Set `FORECAST_MODEL_URI` to "
-            "the trusted MLflow model URI created by this project."
-        )
+    try:
+        demo_mtime_ns = DEMO_FORECAST_PATH.stat().st_mtime_ns
+        with st.spinner("Loading the bundled historical demonstration..."):
+            target, predictions = get_forecast_data(
+                str(DEMO_FORECAST_PATH),
+                demo_mtime_ns,
+            )
+    except (FileNotFoundError, OSError, TypeError, ValueError) as exc:
+        st.error(f"Unable to load the bundled forecast demonstration: {exc}")
         return
 
     try:
-        data_mtime_ns = RAW_DATA_PATH.stat().st_mtime_ns
-        with st.spinner("Loading historical observations and forecast..."):
-            target, predictions = get_forecast_data(
-                str(RAW_DATA_PATH),
-                data_mtime_ns,
-                MODEL_URI,
-                TRACKING_URI,
-            )
-    except (FileNotFoundError, OSError, TypeError, ValueError, mlflow.exceptions.MlflowException) as exc:
-        st.error(f"Unable to prepare the forecast: {exc}")
+        default_history, predictions = build_recent_plot_series(target, predictions)
+    except (TypeError, ValueError) as exc:
+        st.error(f"The bundled forecast demonstration is invalid: {exc}")
         return
-
-    default_history, predictions = build_recent_plot_series(target, predictions)
     last_observation = default_history.index[-1]
     forecast_origin = predictions.index[0]
 
@@ -554,10 +552,14 @@ def render_evaluation_page() -> None:
     )
 
     try:
-        with st.spinner("Reading recorded evaluation metrics from MLflow..."):
-            metrics = get_evaluation_metrics(TRACKING_URI)
-    except (OSError, ValueError, mlflow.exceptions.MlflowException) as exc:
-        st.error(f"Unable to load the recorded final-test metrics: {exc}")
+        demo_mtime_ns = DEMO_METRICS_PATH.stat().st_mtime_ns
+        with st.spinner("Reading the bundled evaluation summary..."):
+            metrics = get_evaluation_metrics(
+                str(DEMO_METRICS_PATH),
+                demo_mtime_ns,
+            )
+    except (FileNotFoundError, OSError, ValueError) as exc:
+        st.error(f"Unable to load the bundled evaluation summary: {exc}")
         return
 
     gradient_boosting = metrics.loc[
@@ -584,7 +586,8 @@ def render_evaluation_page() -> None:
     )
     st.caption(
         "The 193 daily rolling-origin windows contain 4,632 hourly forecasts "
-        "per method. Results summarize this historical period only."
+        "per method. These previously recorded results are bundled with the "
+        "app and are not recalculated at runtime."
     )
 
 
@@ -635,6 +638,9 @@ def render_methodology_page() -> None:
         - **Historical coverage:** the source data runs from December 2006 to
           November 2010. The displayed forecast is a historical demonstration,
           not a current prediction.
+        - **Hosted demonstration:** the app displays a bundled 14-day sample
+          and precomputed 24-hour forecast; it does not access the raw dataset,
+          load an MLflow model, or calculate new predictions.
         - **Incomplete measurements:** partial or invalid hours remain
           missing. No interpolation or silent imputation is performed.
         - **Evaluation scope:** results come from one chronological period and

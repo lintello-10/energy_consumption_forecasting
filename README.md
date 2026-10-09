@@ -194,21 +194,16 @@ dashboard/               Streamlit dashboard and display-data helpers
 
 ## Run the dashboard
 
-Install the dashboard dependencies (including MLflow):
+Install the dashboard dependencies and start the app:
 
 ```bash
 python -m pip install -e ".[dashboard]"
-```
-
-Set `FORECAST_MODEL_URI` to a trusted model URI printed by
-`energy_forecasting.train_model`, then start the app:
-
-```bash
-export FORECAST_MODEL_URI="runs:/<run-id>/model"
 python -m streamlit run dashboard/app.py
 ```
 
-Open the local URL printed by Streamlit. The app reads the existing final-test
-metrics from MLflow and displays them with an explicit warning that the
-holdout period was previously examined. It does not run training or
-evaluation. Only load trusted model artifacts created by this project.
+The dashboard reads a bundled, precomputed 14-day historical sample and
+24-hour forecast, plus the published evaluation summary. It does not need the
+raw dataset, an MLflow tracking database, or a model URI at runtime. The
+hosted app does not generate new predictions: the controls explore this fixed
+historical demonstration, and the evaluation page clearly labels the
+previously examined chronological holdout.
