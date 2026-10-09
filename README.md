@@ -9,6 +9,8 @@ data.
 > November 2010. The saved model and example forecast describe that historical
 > dataset; they are not forecasts of current household consumption.
 
+[Open the live Streamlit demo](https://energyconsumptionforecasting-9ejqpwflvhxzergfsympin.streamlit.app/)
+
 ## Dataset and target
 
 The source dataset contains 2,075,259 minute-level records. The raw file is
