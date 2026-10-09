@@ -8,7 +8,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from dashboard.dashboard_data import (
+from dashboard_data import (
     build_recent_plot_series,
     load_final_test_metrics,
     load_forecast_data,
