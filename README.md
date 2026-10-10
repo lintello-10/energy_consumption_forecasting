@@ -11,6 +11,8 @@ data.
 
 [Open the live Streamlit demo](https://energyconsumptionforecasting-9ejqpwflvhxzergfsympin.streamlit.app/)
 
+[![Tests](https://github.com/lintello-10/energy_consumption_forecasting/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/lintello-10/energy_consumption_forecasting/actions/workflows/tests.yml)
+
 ## Dataset and target
 
 The source dataset contains 2,075,259 minute-level records. The raw file is
@@ -41,6 +43,20 @@ historical dataset. They are exploratory summaries, not evidence that these
 patterns will remain stable in another period.
 
 ![Exploratory hourly and weekday consumption profiles](reports/figures/calendar_patterns.png)
+
+## Time-series diagnostics
+
+Exploratory ADF and KPSS tests were applied to the longest uninterrupted
+segment in an earlier training portion of the series. Their results were
+compatible with trend-stationarity for that segment, but they do not establish
+that the full series is stationary. The detrended ACF showed short-term
+dependence and recurring peaks around daily lags, with a positive association
+also visible at a weekly lag. These plots and tests are descriptive diagnostics,
+not proof of forecast performance or automatic model-selection rules.
+
+See the [exploratory notebook](notebooks/Exploratory_Data_Analysis.ipynb) and
+the [detailed results and methodology](reports/forecasting_results.md) for
+their scope and interpretation.
 
 ## Forecasting workflow
 
@@ -156,7 +172,7 @@ mlflow ui \
   --port 5000
 ```
 
-Then open <http://127.0.0 .1:5000>. Validation experiments, the recorded final
+Then open <http://127.0.0.1:5000>. Validation experiments, the recorded final
 evaluation, and the operational model run have different purposes; check each
 run's name and tags before interpreting its metrics or artifacts.
 

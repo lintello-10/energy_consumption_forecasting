@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "energy-consumption-forecasting"
 version = "0.1.0"
-description = "Time-series forecasting and anomaly analysis for energy consumption"
+description = "Time-series forecasting of household energy consumption"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -37,6 +37,5 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-
 
 
