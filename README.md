@@ -115,6 +115,16 @@ Exploratory ADF and KPSS tests were applied to the **longest uninterrupted segme
 |---|---|---|
 | 📈 **Streamlit Dashboard** | Interactive exploration of a bundled, precomputed 14-day historical sample, its 24-hour forecast, and the published evaluation summary | [**Open the live demo →**](https://energyconsumptionforecasting-9ejqpwflvhxzergfsympin.streamlit.app/) |
 
+<br>
+
+<div align="center">
+
+<img src="reports/Screenshot 2026-11-04 210654.png" alt="Streamlit Dashboard Preview" width="100%" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+
+</div>
+
+<br>
+
 > [!NOTE]
 > The hosted app **does not generate new predictions**. Its controls explore a fixed historical demonstration, and the evaluation page clearly labels the previously examined chronological holdout.
 
